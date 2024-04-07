@@ -5,7 +5,7 @@ A <- 5
 B <- 10
 C <-A+B
 C
-# Printing Quotient Of Operation
+# Printing Quotient Of Operators
 v1 <- 4.5
 v2 <- 2
 v3 <- v1/v2
