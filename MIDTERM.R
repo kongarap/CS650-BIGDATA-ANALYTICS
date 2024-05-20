@@ -1,54 +1,69 @@
-# Install necessary packages if not already installed
-if (!requireNamespace("ggplot2", quietly = TRUE)) {
-  install.packages("ggplot2")
-}
-if (!requireNamespace("rlang", quietly = TRUE)) {
-  install.packages("rlang")
-}
+# Install dplyr package if not already installed
+install.packages("dplyr")
 
 # Load necessary libraries
 library(ggplot2)
-library(rlang)
+library(dplyr)
 
+# Load the dataset
+iris_data <- read.csv(file.choose())
 
-iris <- read.csv(file.choose())
-head(iris)
+# Display the first few rows of the dataset
+head(iris_data)
 
-# Load necessary libraries
-library(ggplot2)
-
-
-# Linear Regression
-linear_model <- lm(sepal_length ~ sepal_width + petal_length + petal_width, data = iris)
+# 1. Linear Regression
+# Linear regression to predict Petal.Length based on Sepal.Length
+linear_model <- lm(petal_length ~ sepal_length, data = iris_data)
 summary(linear_model)
 
-# Polynomial Regression
-poly_model <- lm(sepal_length ~ poly(sepal_width, 2) + poly(petal_length, 2) + poly(petal_width, 2), data = iris)
+# Visualization for Linear Regression
+ggplot(iris_data, aes(x = sepal_length, y = petal_length)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, col = "blue") +
+  labs(title = "Linear Regression: Petal Length vs Sepal Length", x = "Sepal Length", y = "Petal Length")
+
+# 2. Polynomial Regression
+# Polynomial regression to predict Petal.Length based on Sepal.Length
+poly_model <- lm(petal_length ~ poly(sepal_length, 2), data = iris_data)
 summary(poly_model)
 
-# Create scatter plot with linear regression line
-linear_plot <- ggplot(iris, aes(x = sepal_width, y = sepal_length)) +
+# Visualization for Polynomial Regression
+ggplot(iris_data, aes(x = sepal_length, y = petal_length)) +
   geom_point() +
-  geom_smooth(method = "lm", formula = y ~ x, color = "blue") +
-  labs(title = "Linear Regression: Sepal Length vs. Sepal Width")
+  stat_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE, col = "red") +
+  labs(title = "Polynomial Regression: Petal Length vs Sepal Length", x = "Sepal Length", y = "Petal Length")
 
-# Create scatter plot with polynomial regression line
-poly_plot <- ggplot(iris, aes(x = sepal_width, y = sepal_length)) +
-  geom_point() +
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red") +
-  labs(title = "Polynomial Regression: Sepal Length vs. Sepal Width (Quadratic)")
+# 3. Logistic Regression
+# Convert Species to a binary variable (setosa vs non-setosa)
+iris_data <- iris_data %>%
+  mutate(species_binary = ifelse(species == "setosa", 1, 0))
 
-# Show plots
-linear_plot
-poly_plot
-
-# Logistic Regression
-iris$species <- as.factor(iris$species)  # Convert species to factor
-logistic_model <- glm(species ~ sepal_length + sepal_width + petal_length + petal_width, data = iris, family = binomial)
+# Logistic regression to predict Species_binary based on Petal.Length
+logistic_model <- glm(species_binary ~ petal_length, data = iris_data, family = binomial)
 summary(logistic_model)
 
-# Visualize Logistic Regression
-ggplot(iris, aes(x = sepal_length, color = species)) +
+# Visualization for Logistic Regression
+ggplot(iris_data, aes(x = petal_length, y = species_binary)) +
   geom_point() +
-  geom_smooth(method = "glm", method.args = list(family = "binomial"), se = FALSE) +
-  labs(title = "Logistic Regression: Sepal Length vs. Species")
+  stat_smooth(method = "glm", method.args = list(family = binomial), se = FALSE, col = "green") +
+  labs(title = "Logistic Regression: Species vs Petal Length", x = "Petal Length", y = "Probability of Setosa")
+
+
+# Additional Plots for Visualization
+# Scatter plot with linear regression line
+plot1 <- ggplot(iris_data, aes(x = sepal_length, y = petal_length, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Scatter Plot with Linear Regression Line", x = "Sepal Length", y = "Petal Length")
+
+# Scatter plot with polynomial regression line
+plot2 <- ggplot(iris_data, aes(x = sepal_length, y = petal_length, color = species)) +
+  geom_point() +
+  stat_smooth(method = "lm", formula = y ~ poly(x, 2), se = FALSE) +
+  labs(title = "Scatter Plot with Polynomial Regression Line", x = "Sepal Length", y = "Petal Length")
+
+
+
+# Print the plots
+print(plot1)
+print(plot2)
